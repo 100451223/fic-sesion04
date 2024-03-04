@@ -8,11 +8,14 @@ BUTTON_GPIO = 16
 LDR_GPIO = 4
 TRIGGER_GPIO = 23
 ECHO_GPIO = 24
+CC_MOTOR_ENABLE = 13
+CC_MOTOR_INPUT_A = 5 # Input 1
+CC_MOTOR_INPUT_B = 6 # Input 2
 
 def signal_handler(sig, frame):
     global power_on
 
-    print("Exiting program")
+    print("Exiting program.\nThank you for playing!")
     power_on = False
     GPIO.cleanup()
     sys.exit(0)
@@ -118,17 +121,30 @@ def launch_sensor_threads():
     except:
         return -1
     
+def ask_for_motor_speed(lower_limit=0, upper_limit=120):
+    while True:
+        try:
+            speed = int(input("Enter speed (0-100): "))
+            if speed < lower_limit or speed > upper_limit:
+                print("Speed must be between 0 and 100")
+                continue
+            break
+        except:
+            print("Invalid input. Please enter a number")
+    return speed
+    
 
 if __name__ == "__main__":
     power_on = False
     threads_initialized = False
+    ask_for_motor_speed()
+
     setup_devices()
     
     signal.signal(signal.SIGINT, signal_handler)
 
     th.Thread(target=button_thread, daemon=True).start()
     while True:
-        print('Vehicle power is', 'on' if power_on else 'off')
         if power_on:
             if not threads_initialized:
                 if(launch_sensor_threads() == 0):
