@@ -132,6 +132,12 @@ def setup_motor():
     GPIO.output(CC_MOTOR_INPUT_B, False)
     GPIO.output(CC_MOTOR_ENABLE, True)
 
+def turn_off_motor():
+    GPIO.output(CC_MOTOR_INPUT_A, False)
+    GPIO.output(CC_MOTOR_INPUT_B, False)
+    GPIO.output(CC_MOTOR_ENABLE, False)
+
+
 def motor_thread(speed):
     global power_on
     print("Motor thread started")
@@ -148,6 +154,8 @@ def motor_thread(speed):
 
     print("Stopping engine...")
     dc_motor_object.stop()
+    dc_motor_object.ChangeDutyCycle(0)
+    turn_off_motor()
 
 
 def launch_threads(motor_speed):
@@ -165,6 +173,7 @@ def launch_threads(motor_speed):
 if __name__ == "__main__":
     power_on = False
     threads_initialized = False
+    speed = ask_for_motor_speed()
 
     setup_devices()
     
@@ -174,7 +183,6 @@ if __name__ == "__main__":
     while True:
         if power_on:
             if not threads_initialized:
-                speed = ask_for_motor_speed()
                 if(launch_threads(motor_speed=speed) == 0):
                     threads_initialized = True
                 else:
