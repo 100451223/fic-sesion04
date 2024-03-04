@@ -18,6 +18,7 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 def setup_devices():
+    print("Setting up devices")
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(BUTTON_GPIO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.setup(LDR_GPIO, GPIO.IN)
@@ -85,8 +86,9 @@ def button_callback(channel):
     print('Vehicle power is', 'on' if power_on else 'off')
 
 def button_thread():
-    # Button thread shall live as long as the program is running
+    # Button thread shall live as long as the program is runnin
 
+    print("Button thread started")
     GPIO.add_event_detect(BUTTON_GPIO, GPIO.RISING, callback=button_callback, bouncetime=50)
     while True:
         time.sleep(0.1)
@@ -94,6 +96,7 @@ def button_thread():
 def luminosity_thread():
     global power_on
 
+    print("Luminosity sensor thread started")
     while power_on:
         print_luminosity(get_luminosity(LDR_GPIO))
         time.sleep(0.1)
@@ -101,11 +104,13 @@ def luminosity_thread():
 def distance_thread():
     global power_on
 
+    print("Distance sensor thread started")
     while power_on:
         print("Distance:", get_distance(TRIGGER_GPIO, ECHO_GPIO), "cm")
         time.sleep(0.1)
 
 def launch_threads():
+    print("Launching threads...")
     try:
         th.Thread(target=button_thread, daemon=True).start()
         th.Thread(target=luminosity_thread, daemon=True).start()
@@ -123,6 +128,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
 
     while True:
+        print('Vehicle power is', 'on' if power_on else 'off')
         if power_on:
             if not threads_initialized:
                 if(launch_threads() == 0):
