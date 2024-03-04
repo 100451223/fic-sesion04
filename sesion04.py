@@ -165,7 +165,6 @@ def launch_threads(motor_speed):
 if __name__ == "__main__":
     power_on = False
     threads_initialized = False
-    speed = ask_for_motor_speed()
 
     setup_devices()
     
@@ -175,6 +174,7 @@ if __name__ == "__main__":
     while True:
         if power_on:
             if not threads_initialized:
+                speed = ask_for_motor_speed()
                 if(launch_threads(motor_speed=speed) == 0):
                     threads_initialized = True
                 else:
