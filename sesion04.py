@@ -27,6 +27,9 @@ def setup_devices():
     GPIO.setup(LDR_GPIO, GPIO.IN)
     GPIO.setup(TRIGGER_GPIO, GPIO.OUT)
     GPIO.setup(ECHO_GPIO, GPIO.IN)
+    GPIO.setup(CC_MOTOR_ENABLE, GPIO.OUT)
+    GPIO.setup(CC_MOTOR_INPUT_A, GPIO.OUT)
+    GPIO.setup(CC_MOTOR_INPUT_B, GPIO.OUT)
 
 def get_luminosity(PIN_LDR):
     count = 0
@@ -112,15 +115,6 @@ def distance_thread():
         print("Distance:", get_distance(TRIGGER_GPIO, ECHO_GPIO), "cm")
         time.sleep(0.1)
 
-def launch_sensor_threads():
-    print("Launching threads...")
-    try:
-        th.Thread(target=luminosity_thread, daemon=True).start()
-        th.Thread(target=distance_thread, daemon=True).start()
-        return 0
-    except:
-        return -1
-    
 def ask_for_motor_speed(lower_limit=0, upper_limit=120):
     while True:
         try:
@@ -132,12 +126,46 @@ def ask_for_motor_speed(lower_limit=0, upper_limit=120):
         except:
             print("Invalid input. Please enter a number")
     return speed
+
+def setup_motor():
+    GPIO.output(CC_MOTOR_INPUT_A, True)
+    GPIO.output(CC_MOTOR_INPUT_B, False)
+    GPIO.output(CC_MOTOR_ENABLE, True)
+
+def motor_thread(speed):
+    global power_on
+    print("Motor thread started")
+
+    print("Starting engine...")
+    dc_motor_object = GPIO.PWM(CC_MOTOR_ENABLE, 100)
+    setup_motor()
+    dc_motor_object.start(0)
+    dc_motor_object.ChangeDutyCycle(speed)
+    print("Engine started successfully!")
+    
+    while power_on:
+        time.sleep(0.1)
+
+    print("Stopping engine...")
+    dc_motor_object.stop()
+
+
+def launch_threads(motor_speed):
+    print("Launching threads...")
+    try:
+        th.Thread(target=luminosity_thread, daemon=True).start()
+        th.Thread(target=distance_thread, daemon=True).start()
+        th.Thread(target=motor_thread, args=(motor_speed,), daemon=True).start()
+        return 0
+    except:
+        return -1
+
     
 
 if __name__ == "__main__":
     power_on = False
     threads_initialized = False
-    ask_for_motor_speed()
+    speed = ask_for_motor_speed()
 
     setup_devices()
     
@@ -147,7 +175,7 @@ if __name__ == "__main__":
     while True:
         if power_on:
             if not threads_initialized:
-                if(launch_sensor_threads() == 0):
+                if(launch_threads(motor_speed=speed) == 0):
                     threads_initialized = True
                 else:
                     print("[ERROR] Something went wrong while initializing the threads")
