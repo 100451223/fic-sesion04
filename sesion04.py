@@ -109,10 +109,9 @@ def distance_thread():
         print("Distance:", get_distance(TRIGGER_GPIO, ECHO_GPIO), "cm")
         time.sleep(0.1)
 
-def launch_threads():
+def launch_sensor_threads():
     print("Launching threads...")
     try:
-        th.Thread(target=button_thread, daemon=True).start()
         th.Thread(target=luminosity_thread, daemon=True).start()
         th.Thread(target=distance_thread, daemon=True).start()
         return 0
@@ -127,11 +126,12 @@ if __name__ == "__main__":
     
     signal.signal(signal.SIGINT, signal_handler)
 
+    th.Thread(target=button_thread, daemon=True).start()
     while True:
         print('Vehicle power is', 'on' if power_on else 'off')
         if power_on:
             if not threads_initialized:
-                if(launch_threads() == 0):
+                if(launch_sensor_threads() == 0):
                     threads_initialized = True
                 else:
                     print("[ERROR] Something went wrong while initializing the threads")
