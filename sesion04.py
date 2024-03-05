@@ -86,21 +86,24 @@ def print_luminosity(light_count):
     print("\t|" + ("#" * int(40 * (1 - normalized_light))) + (" " * int(40 * normalized_light)) + "|")
     print("\tCapacitor charge count:", light_count)
 
-def button_callback(channel):
-    global power_on
+# def button_callback(channel):
+#     global power_on
 
-    # Check if button is pressed
-    if GPIO.input(BUTTON_GPIO):
-        power_on = not power_on
-        
-    print('Vehicle power is', 'on' if power_on else 'off')
+#     # Check if button is pressed
+#     if not GPIO.input(BUTTON_GPIO):
+#         power_on = not power_on
+
+#     print('Vehicle power is', 'on' if power_on else 'off')
 
 def button_thread():
     # Button thread shall live as long as the program is runnin
+    global power_on
 
     print("Button thread started")
-    GPIO.add_event_detect(BUTTON_GPIO, GPIO.RISING, callback=button_callback, bouncetime=50)
+    # GPIO.add_event_detect(BUTTON_GPIO, GPIO.RISING, callback=button_callback, bouncetime=50)
     while True:
+        if not GPIO.input(BUTTON_GPIO):
+            power_on = not power_on
         time.sleep(0.1)
 
 def luminosity_thread():
