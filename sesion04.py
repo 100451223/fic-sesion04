@@ -104,7 +104,8 @@ def button_thread():
     while True:
         if not GPIO.input(BUTTON_GPIO):
             power_on = not power_on
-        time.sleep(1)
+            time.sleep(0.5)
+        time.sleep(0.1)
 
 def luminosity_thread():
     global power_on
