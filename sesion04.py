@@ -88,7 +88,11 @@ def print_luminosity(light_count):
 
 def button_callback(channel):
     global power_on
-    power_on = not power_on
+
+    # Check if button is pressed
+    if GPIO.input(BUTTON_GPIO):
+        power_on = not power_on
+        
     print('Vehicle power is', 'on' if power_on else 'off')
 
 def button_thread():
