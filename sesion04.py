@@ -4,10 +4,10 @@ import sys
 import RPi.GPIO as GPIO
 import time, math
 
-BUTTON_GPIO = 16
+BUTTON_GPIO = 23
 LDR_GPIO = 4
-TRIGGER_GPIO = 23
-ECHO_GPIO = 24
+TRIGGER_GPIO = 24
+ECHO_GPIO = 25
 CC_MOTOR_ENABLE = 13
 CC_MOTOR_INPUT_A = 5 # Input 1
 CC_MOTOR_INPUT_B = 6 # Input 2
@@ -86,21 +86,11 @@ def print_luminosity(light_count):
     print("\t|" + ("#" * int(40 * (1 - normalized_light))) + (" " * int(40 * normalized_light)) + "|")
     print("\tCapacitor charge count:", light_count)
 
-# def button_callback(channel):
-#     global power_on
-
-#     # Check if button is pressed
-#     if not GPIO.input(BUTTON_GPIO):
-#         power_on = not power_on
-
-#     print('Vehicle power is', 'on' if power_on else 'off')
-
 def button_thread():
     # Button thread shall live as long as the program is runnin
     global power_on
 
     print("Button thread started")
-    # GPIO.add_event_detect(BUTTON_GPIO, GPIO.RISING, callback=button_callback, bouncetime=50)
     while True:
         if not GPIO.input(BUTTON_GPIO):
             power_on = not power_on
